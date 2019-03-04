@@ -1,18 +1,39 @@
-function draw_grid() {
+function draw_stones(){
 
-	var width = 1600;
-	var height = 900;
-	var cellSize = 10;
-	var gridHeight = height / cellSize;
-	var gridWidth = width / cellSize;
+	for (let i = 0; i < grid[i].length; i++) {
 
-	// draw grid
-	for (let i = 0; i < gridWidth; i++) {
+		for (let j = 0; j < grid[j].length; j++) {
 
-  		for (let j = 0; j < gridHeight; j++) {
+  			if (grid[i][j] == 1){
 
-    		context.strokeStyle = "green";
-			context.strokeRect(i * cellSize, j * cellSize, cellSize, cellSize);
+  				context.fillStyle = "black"; // <<-- customize clear/background color here
+				context.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+
+  			} 
   		}
 	}
+}
+
+function get_random_dir(){
+
+	var dir = (Math.floor(Math.random() * 3)) - 1; // generates random int of -1, 0 or 1
+
+	return (dir * cellSize);
+
+}
+
+function get_random_x(){
+
+	var loc_x = (Math.floor(Math.random() * (gridWidth + 1)));
+
+	return loc_x;
+
+}
+
+function get_random_y(){
+
+	var loc_y = (Math.floor(Math.random() * (gridHeight + 1)));
+
+	return loc_y;
+
 }
