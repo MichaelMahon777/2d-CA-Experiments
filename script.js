@@ -2,7 +2,7 @@
 var width = 1600;
 var height = 900;
 var zoom = 0;
-var fps = 5;
+var fps = 60;
 
 var cellSize = 10;
 var gridHeight = height / cellSize;
@@ -14,31 +14,56 @@ var context;
 var imageData;
 
 var termites = Array(50);
-var num_stones = 2000;
+var num_stones = 1000;
 
-var grid = Array();
+var grid = [];
 
-for (let i = 0; i < width; i++) {
+for (var i = 0; i < gridWidth; i++) {	
+	
+		grid[i] = [];							//initialize grid with 0's
 
-	grid[i] = [];
-
-  	for (let j = 0; j < height; j++) {
+  	for (var j = 0; j < gridHeight; j++) {
 
   		grid[i][j] = 0;
 
   	}
 }
 
-for (i = 0; i < num_stones; i++){
+// create stone grid
+for (var i = 0; i < num_stones; i++){
 
-	grid[get_random_x()][get_random_y()] = 1;	// random grids are turned on with value of 1
+	var grid_x = get_random_x();
+	var grid_y = get_random_y();
+	grid[grid_x][grid_y] = 1;					// random grid locations are 'turned on' with value of 1
 
 }
 
-for (i = 0; i < termites.length; i++){
+// create termite objects
+for (var i = 0; i < termites.length; i++){
 
 	termites[i] = new Termite(false, get_random_x(), get_random_y());
 
+}
+
+function draw_stones(){
+
+	for (var i = 0; i < gridWidth; i++) {
+
+		for (var j = 0; j < gridHeight; j++) {
+
+  			if (grid[i][j] == 1){
+
+  				context.fillStyle = "black"; // <<-- customize clear/background color here
+				context.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+
+  			} else if (grid[i][j] == 0){
+
+  				context.fillStyle = "white"; // <<-- customize clear/background color here
+				context.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+
+  			}
+		}
+	}
 }
 
 // graphics initialization
@@ -58,48 +83,73 @@ const redraw = () => {
 	context.fillStyle = "white"; // <<-- customize clear/background color here
 	context.fillRect(0, 0, width, height);
 
-	for (i = 0; i < termites.length; i++){ // go through all termites
-
-		termites[i].draw("orange");
-		
-		// add clamp to borders of screen so termites coordinates dont go negative
-
-		termites[i].move(get_random_dir(), get_random_dir());
-
-	}
-
 	draw_stones();
 
-	for (i = 0; i < termites.length; i++){  // go through all termites
+	// Termite draw and move
+	for (var i = 0; i < termites.length; i++){ 						// go through all termites
 
-		if (grid[termites[i].x][termites[i].y] == 1){	// if tmermite is on a stone...
-
-		console.log("Termite is on a stone");
+		termites[i].draw("orange"); 								// draw the termites
 		
-		}
+		termites[i].move(get_random_dir(), get_random_dir()); 		// move the termites based on random direction
 
 	}
 
-	
+	// Termite pick up and drop stones
+	for (var i = 0; i < termites.length; i++){			// boundary check to calculate termite location
 
-	// for (i = 0; i < termites.length; i++){ // go through all termites
-	// 	for (j = 0; j < stones.length; j++){ // go through all stones
+		if (termites[i].x > 0){
 
-	// 	if  (termites[i].pickup == true 					// if a termite is carrying a stone
-	// 		&& termites[i].x != stones[j].x                 // and is not on top of a stone
-	// 		&& termites[i].y != stones[j].y
-	// 		&& termites[i].x + cellSize == stones[j].x      // and borders a stone
-	// 		|| termites[i].x - cellSize == stones[j].x
-	// 		|| termites[i].y + cellSize == stones[j].y
-	// 		|| termites[i].y - cellSize == stones[j].y) {
+			term_x = termites[i].x / cellSize;
 
-	// 		termites[i].pickup = false;						// termite stops carrying and...
+		} else {
 
-	// 		// stones.splice(j, 0, new GameObject(false, termites[i].x, termites[i].y)); // ...a new stone is created at termite's location
+			term_x = 0;
+		}
 
-	// 		}
-	// 	}	
-	
+		if (termites[i].y > 0){
+
+			term_y = termites[i].y / cellSize;
+
+		} else {
+
+			term_y = 0;
+		}
+
+		if (grid[term_x][term_y] == 1 && termites[i].pickup == false){			// if on a stone, not carrying...start carrying, remove stone					
+
+			termites[i].pickup = true;													
+			grid[term_x][term_y] = 0;	
+
+		} else if (grid[term_x][term_y] == 1 && termites[i].pickup == true){	// if on a stone, is carrying...continue carrying, leave stone
+
+			termites[i].pickup = true;													
+			grid[term_x][term_y] = 1;	
+
+		} else if (grid[term_x][term_y] == 0 && termites[i].pickup == false){	// if on white space, not carrying...continue not carrying, leave as white
+
+			termites[i].pickup = false;													
+			grid[term_x][term_y] = 0;	
+
+
+		// if on white space, and carrying...determine if there are neighbors (up, down, left, right only)...if so: drop stone
+		} else if (termites[i].x != 0 && termites[i].x != (width - cellSize) && termites[i].y != 0 && termites[i].y !=0 && termites[i].y !=(height - cellSize)){  // boundary check	
+
+			if   (grid[term_x - 1][term_y] == 1		// check for neighbor stones
+			   || grid[term_x + 1][term_y] == 1
+			   || grid[term_x][term_y + 1] == 1
+			   || grid[term_x][term_y - 1] == 1){
+
+				termites[i].pickup = false;													
+				grid[term_x][term_y] = 1;
+			
+			} else {
+
+				termites[i].pickup = true;													
+				grid[term_x][term_y] = 0;
+
+			}
+		}		
+	}
 }
 
 const loop = () => {
@@ -113,7 +163,7 @@ const loop = () => {
 
 /*
 set canvas size to match window
-this uses an offscreen canvas with your specified resolution to draw to
+this uses an off-screen canvas with your specified resolution to draw to
 it then cleanly resizes and draws this to a second canvas in the browser window
 this second canvas is set to the nearest clean multiple of your desired size
 */

@@ -1,18 +1,3 @@
-function draw_stones(){
-
-	for (let i = 0; i < grid[i].length; i++) {
-
-		for (let j = 0; j < grid[j].length; j++) {
-
-  			if (grid[i][j] == 1){
-
-  				context.fillStyle = "black"; // <<-- customize clear/background color here
-				context.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
-
-  			} 
-  		}
-	}
-}
 
 function get_random_dir(){
 
@@ -24,7 +9,7 @@ function get_random_dir(){
 
 function get_random_x(){
 
-	var loc_x = (Math.floor(Math.random() * (gridWidth + 1)));
+	var loc_x = Math.floor(Math.random() * (gridWidth)); // generates random int from 0 (inclusive) to 1600 (exclusive)
 
 	return loc_x;
 
@@ -32,7 +17,7 @@ function get_random_x(){
 
 function get_random_y(){
 
-	var loc_y = (Math.floor(Math.random() * (gridHeight + 1)));
+	var loc_y = Math.floor(Math.random() * (gridHeight)); // generates random int from 0 (inclusive) to 900 (exclusive)
 
 	return loc_y;
 
